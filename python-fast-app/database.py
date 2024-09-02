@@ -2,44 +2,53 @@ import mysql.connector
 import os
 import time
 
+# Wait for MySQL container to start up
+time.sleep(5)  # Adjust the delay as needed
+
+# Database connection configuration
+db_config = {
+    "host": os.getenv("DB_HOST"),
+    "port": int(os.getenv("DB_PORT")),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "database": os.getenv("DB_NAME"),
+}
+
+# Establish a database connection
+db_connection = mysql.connector.connect(**db_config)
+db_cursor = db_connection.cursor()
+
+
+def search_movies_by_year(year_of_release):
+    db_connection = mysql.connector.connect(**db_config)  # Establish a new database connection
+    db_cursor = db_connection.cursor()
+
+    query = "SELECT * FROM hollywood WHERE year_of_release = %s"
+    db_cursor.execute(query, (year_of_release,))
+    results = db_cursor.fetchall()
+
+    db_cursor.close()
+    db_connection.close()
+
+    return results
+
+
+def upload_movie_data(movie_name, year_of_release, box_office, director, producer, cast):
+    query = "INSERT INTO hollywood (movie_name, year_of_release, box_office, director, producer, cast) VALUES (%s, %s, %s, %s, %s, %s)"
+    values = (movie_name, year_of_release, box_office, director, producer, cast)
+    db_cursor.execute(query, values)
+
+    db_connection.commit()
+
+
 class Database:
     def __init__(self):
-        # Wait for MySQL container to start up
-        time.sleep(5)  # Adjust the delay as needed
+        self.data = []
 
-        # Database connection configuration
-        self.db_config = {
-            "host": os.getenv("DB_HOST"),
-            "port": int(os.getenv("DB_PORT")),
-            "user": os.getenv("DB_USER"),
-            "password": os.getenv("DB_PASSWORD"),
-            "database": os.getenv("DB_NAME"),
-        }
+    def add(self, item):
+        self.data.append(item)
 
-        # Establish a database connection
-        self.db_connection = mysql.connector.connect(**self.db_config)
-        self.db_cursor = self.db_connection.cursor()
+    def get_all(self):
+        return self.data
 
-    def search_movies_by_year(self, year_of_release):
-        query = "SELECT * FROM hollywood WHERE year_of_release = %s"
-        self.db_cursor.execute(query, (year_of_release,))
-        results = self.db_cursor.fetchall()
-
-        return results
-
-    def upload_movie_data(self, movie_name, year_of_release, box_office, director, producer, cast):
-        query = "INSERT INTO hollywood (movie_name, year_of_release, box_office, director, producer, cast) VALUES (%s, %s, %s, %s, %s, %s)"
-        values = (movie_name, year_of_release, box_office, director, producer, cast)
-        self.db_cursor.execute(query, values)
-        self.db_connection.commit()
-
-    def close_connection(self):
-        self.db_cursor.close()
-        self.db_connection.close()
-
-# Usage example
-if __name__ == "__main__":
-    db = Database()
-    # Perform operations using db.search_movies_by_year() or db.upload_movie_data()
-    db.close_connection()
 
