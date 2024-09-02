@@ -1,10 +1,6 @@
 import mysql.connector
-import time
-from dotenv import load_dotenv
 import os
-
-# Load environment variables from .env file
-load_dotenv()
+import time
 
 # Wait for MySQL container to start up
 time.sleep(5)  # Adjust the delay as needed
@@ -21,6 +17,7 @@ db_config = {
 # Establish a database connection
 db_connection = mysql.connector.connect(**db_config)
 db_cursor = db_connection.cursor()
+
 
 def search_movies_by_year(year_of_release):
     db_connection = mysql.connector.connect(**db_config)  # Establish a new database connection
@@ -40,4 +37,18 @@ def upload_movie_data(movie_name, year_of_release, box_office, director, produce
     query = "INSERT INTO hollywood (movie_name, year_of_release, box_office, director, producer, cast) VALUES (%s, %s, %s, %s, %s, %s)"
     values = (movie_name, year_of_release, box_office, director, producer, cast)
     db_cursor.execute(query, values)
+
     db_connection.commit()
+
+
+class Database:
+    def __init__(self):
+        self.data = []
+
+    def add(self, item):
+        self.data.append(item)
+
+    def get_all(self):
+        return self.data
+
+

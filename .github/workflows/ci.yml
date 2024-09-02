@@ -1,0 +1,73 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - 'feature/*'
+
+jobs:
+  linter:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          pip install flake8
+      - name: Run linter
+        run: |
+          flake8 .
+
+  code_quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    needs: linter
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          pip install pylint
+      - name: Run code quality check
+        run: |
+          pylint .
+
+  unit_test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    needs: code_quality
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          pip install pytest
+      - name: Run unit tests
+        run: |
+          pytest
+
+  merge:
+    name: Merge to dev
+    runs-on: ubuntu-latest
+    needs: unit_test
+    if: success()
+    steps:
+      - uses: actions/checkout@v3
+      - name: Merge feature branch into dev
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git checkout dev
+          git merge --no-ff ${{ github.head_ref }}
+          git push origin dev
+
