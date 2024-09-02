@@ -1,10 +1,13 @@
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.templating import Jinja2Templates
-from database import search_movies_by_year, upload_movie_data
+from database import Database  # Assuming Database class is updated
 import uvicorn
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
+
+# Instantiate the Database class
+db = Database()
 
 @app.get("/")
 def home(request: Request):
@@ -12,8 +15,11 @@ def home(request: Request):
 
 @app.post("/")
 def search_movies(request: Request, year_of_release: int = Form(...)):
-    results = search_movies_by_year(year_of_release)
-    # results = ""
+    try:
+        results = db.search_movies_by_year(year_of_release)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving data: {e}")
+    
     return templates.TemplateResponse("index.html", {"request": request, "results": results})
 
 @app.get("/upload_data")
@@ -30,19 +36,14 @@ def upload_movie_data_handler(
     producer: str = Form(...),
     cast: str = Form(...)
 ):
-    upload_movie_data(movie_name, year_of_release, box_office, director, producer, cast)
-    return templates.TemplateResponse("upload_data.html", {"request": request})
+    try:
+        db.upload_movie_data(movie_name, year_of_release, box_office, director, producer, cast)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error uploading data: {e}")
+
+    return templates.TemplateResponse("upload_data.html", {"request": request, "message": "Movie data uploaded successfully!"})
 
 # Run the app
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-    # Before (example errors)
-
-
-# After fixes
-def main():
-
-    print("Hello World")
-# More code...
 
