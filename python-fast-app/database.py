@@ -45,15 +45,6 @@ db_connection.commit()
 
 
 
-# Before (example errors)
-class Database:
-    def __init__(self):
-        self.data = []
-    def add(self, item):
-        self.data.append(item)
-    def get_all(self):
-        return self.data
-
 # After fixes
 class Database:
 
