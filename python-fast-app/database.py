@@ -40,4 +40,29 @@ def upload_movie_data(movie_name, year_of_release, box_office, director, produce
     query = "INSERT INTO hollywood (movie_name, year_of_release, box_office, director, producer, cast) VALUES (%s, %s, %s, %s, %s, %s)"
     values = (movie_name, year_of_release, box_office, director, producer, cast)
     db_cursor.execute(query, values)
-    db_connection.commit()
+
+db_connection.commit()
+
+
+
+# Before (example errors)
+class Database:
+    def __init__(self):
+        self.data = []
+    def add(self, item):
+        self.data.append(item)
+    def get_all(self):
+        return self.data
+
+# After fixes
+class Database:
+
+    def __init__(self):
+        self.data = []
+
+    def add(self, item):
+        self.data.append(item)
+
+    def get_all(self):
+        return self.data
+

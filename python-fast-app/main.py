@@ -36,3 +36,15 @@ def upload_movie_data_handler(
 # Run the app
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    # Before (example errors)
+def main():
+    print("Hello World")
+# More code...
+
+# After fixes
+def main():
+
+    print("Hello World")
+# More code...
+
